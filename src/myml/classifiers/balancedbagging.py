@@ -14,31 +14,33 @@ class RatioBaggingClassifier(object):
     negatives ratio. The final score is given by the mean of the scores.
     """
 
-    def __init__(self, classifier):
+    def __init__(self, classifier, ratios=([1, 0.8, 0.6], [1, 1, 1])):
+        """
+
+        Args:
+            classifier: base classifier, sklearn-like
+            ratios (tuple of int list): desired sampling ratio for the two classes.
+                The first list containing the ratios for the 0 class, the second
+                list containing the ratios for the 1 class. The length of the 2 list
+                will correspond to the number of classifiers combined
+        """
         self.classifier = classifier
+        self.ratios = ratios
         self.models = []
         self.predictions = []
-        self.seed = None
-        self.ratios = None
 
-    def fit(self, df, ratios=([1,0.8,0.6],[1,1,1]), seed=1234, label_col='outcome'):
+    def fit(self, df, seed=1234, label_col='outcome'):
         """
         Method that trains several models, each on a sample of df that has imbalance
         ratio as described in ratios.
 
         Args:
             df (pd.DataFrame): df containing features and labels
-            ratios (tuple of int list): desired sampling ratio for the two classes.
-                The first list containing the ratios for the 0 class, the second
-                list containing the ratios for the 1 class. The length of the 2 list
-                will correspond to the number of classifiers combined
             seed (int): seed for the sampling
             label_col (str): name of the column containing the label
 
         """
         self.models = []
-        self.seed = seed
-        self.ratios = ratios
 
         if len(self.ratios[0]) != len(self.ratios[1]):
             raise ValueError(
@@ -90,17 +92,31 @@ class BaggingClassifier(object):
     is passed to each bag.
     """
 
-    def __init__(self, classifier, n_estimators=10, d_ratios={0:0.1, 1:1}):
+    def __init__(self, classifier, n_estimators=10, d_ratios={0:0.1, 1:1},
+                 sample_feature=1):
+        """
+
+        Args:
+            classifier: base classifier, sklearn-like
+            n_estimators (int): number of classifier to be combined
+            d_ratios (dict): sampling ratio for each class
+            sample_feature (float): percentage of features to be randomly
+                selected in each classifier
+        """
         self.classifier = classifier
         self.n_estimators = n_estimators
         self.d_ratios = d_ratios
+        self.sample_feature = sample_feature
         self.models = []
         self.predictions = []
 
-    def fit(self, df, seed=1234, label_col='outcome', sample_feature=1):
+    def fit(self, df, seed=1234, label_col='outcome'):
         """
-        sample_feature is the sampling fraction i.e. sample_feature=0.7
-        means that 70% of features will be randomly sampled.
+
+        Args:
+          df (pd.DataFrame): df containing features and labels
+          seed (int): seed to initialize the sampling
+          label_col (str): name of the column containing the label
         """
         self.models = []
         np.random.seed(self.seed)
@@ -116,8 +132,8 @@ class BaggingClassifier(object):
             Y = df_train_undersampled[label_col]
             X = df_train_undersampled.drop([label_col], axis=1)
             all_cols = list(X)
-            if sample_feature < 1:
-                n_feat = int(X.shape[1] * sample_feature)
+            if self.sample_feature < 1:
+                n_feat = int(X.shape[1] * self.sample_feature)
                 X = X.sample(n=n_feat, axis=1)
                 dropped_cols = list(set(all_cols) - set(list(X)))
                 for col in dropped_cols:
@@ -133,6 +149,16 @@ class BaggingClassifier(object):
             self.models.append(model)
 
     def predict_proba(self, X):
+        """
+         Method that predicts the probability score for each row in X. It
+        takes the mean of the score of each classifier.
+
+        Args:
+            X (array of float): dataset containing the features
+
+        Returns: np.array of floats containing the predictions for each
+         row in X
+        """
         self.predictions = []
         for model in self.models:
             self.predictions.append(model.predict_proba(X))
@@ -152,6 +178,7 @@ def sample_by(df, label_col, d_ratios, seed=1234):
     Returns (pd.DataFrame): sampled dataframe
 
     """
+    sampled_df = pd.DataFrame()
     for key, value in d_ratios:
         temp_df = df[df[label_col] == key].\
             sample(frac=value, random_state=seed).reset_index(drop=True)
