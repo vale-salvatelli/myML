@@ -2,13 +2,13 @@
 myML
 ====
 
-This repo will be a container of helpers for ML.
+This repo is a container of helpers for ML modelling.
 
 
 Description
 ===========
 
-At the moment it contains some ensemble methods for classification.
+At the moment it contains some algorithms for classification.
 
 
 Note
