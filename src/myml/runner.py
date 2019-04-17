@@ -1,24 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-This is a skeleton file that can serve as a starting point for a Python
-console script. To run this script uncomment the following lines in the
-[options.entry_points] section in setup.cfg:
-
-    console_scripts =
-         fibonacci = myml.skeleton:run
-
-Then run `python setup.py install` which will install the command `fibonacci`
-inside your current environment.
-Besides console scripts, the header (i.e. until _logger...) of this file can
-also be used as template for Python modules.
-
-Note: This skeleton file can be safely removed if not needed!
+This is a skeleton file for a runner
 """
 
 import argparse
 import sys
 import logging
+
+import pandas as pd
 
 from myml import __version__
 
@@ -29,20 +19,16 @@ __license__ = "mit"
 _logger = logging.getLogger(__name__)
 
 
-def fib(n):
-    """Fibonacci example function
+def load_dataset(path):
+    """Example function
 
     Args:
-      n (int): integer
+      path (str): string containing the path
 
     Returns:
-      int: n-th Fibonacci number
+      df: pandas.DataFrame
     """
-    assert n > 0
-    a, b = 1, 1
-    for i in range(n-1):
-        a, b = b, a+b
-    return a
+    return pd.read_csv(path)
 
 
 def parse_args(args):
@@ -55,16 +41,11 @@ def parse_args(args):
       :obj:`argparse.Namespace`: command line parameters namespace
     """
     parser = argparse.ArgumentParser(
-        description="Just a Fibonnaci demonstration")
+        description="MyML Package")
     parser.add_argument(
         '--version',
         action='version',
         version='myML {ver}'.format(ver=__version__))
-    parser.add_argument(
-        dest="n",
-        help="n-th Fibonacci number",
-        type=int,
-        metavar="INT")
     parser.add_argument(
         '-v',
         '--verbose',
@@ -79,6 +60,11 @@ def parse_args(args):
         help="set loglevel to DEBUG",
         action='store_const',
         const=logging.DEBUG)
+    parser.add_argument(
+        dest="path",
+        help="Path to the dataset that you want to process",
+        type=str,
+        metavar="STR")
     return parser.parse_args(args)
 
 
@@ -101,9 +87,10 @@ def main(args):
     """
     args = parse_args(args)
     setup_logging(args.loglevel)
-    _logger.debug("Starting crazy calculations...")
+    _logger.info("Computation starts")
+    _logger.debug("Loading file...")
     print("The {}-th Fibonacci number is {}".format(args.n, fib(args.n)))
-    _logger.info("Script ends here")
+    _logger.info("Computation ends")
 
 
 def run():
