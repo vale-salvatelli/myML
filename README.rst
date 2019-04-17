@@ -2,14 +2,13 @@
 myML
 ====
 
-
-Add a short description here!
+This repo will be a container of helpers for ML.
 
 
 Description
 ===========
 
-A longer description of your project goes here...
+At the moment it contains some ensemble methods for classification.
 
 
 Note
