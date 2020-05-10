@@ -96,10 +96,7 @@ class BaggingClassifier(object):
     classifier that combines classifiers of the same type trained on
     several bootstrapped samples. Positives to negatives ratio (P2Nratio)
     is the same for each classifier. The final score is given by the mean
-    of the scores. For each base classifier, all the positives are
-    included, the negatives are bootstrapped from the full dataset according
-    to the P2Nratio. If sample_feature <1, a different sample of features
-    is passed to each bag.
+    of the scores.
     """
 
     def __init__(
