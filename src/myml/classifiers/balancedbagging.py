@@ -1,7 +1,7 @@
 """
-This module contains ensemble classifiers designed for imbalanced datasets
+This module contains ensemble binary classifiers designed for
+imbalanced datasets
 """
-from __future__ import division
 import numpy as np
 import pandas as pd
 import copy
