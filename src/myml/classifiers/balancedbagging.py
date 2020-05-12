@@ -104,7 +104,6 @@ class BaggingClassifier(object):
         classifier,
         n_estimators=10,
         d_ratios={0: 0.1, 1: 1},
-        sample_feature=1,
     ):
         """
 
